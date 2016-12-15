@@ -1,30 +1,28 @@
 
+import java.io.*;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.util.Arrays;
+import java.util.List;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
+import com.google.api.client.googleapis.GoogleUtils;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.SecurityUtils;
 import com.google.api.client.util.store.FileDataStoreFactory;
-import com.google.api.services.sheets.v4.SheetsScopes;
-import com.google.api.services.sheets.v4.model.*;
 import com.google.api.services.sheets.v4.Sheets;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.security.KeyStore;
-import java.security.KeyStore.TrustedCertificateEntry;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.util.Arrays;
-import java.util.List;
+import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.ValueRange;
 
 public class Quickstart {
 	/** Application name. */
@@ -53,7 +51,13 @@ public class Quickstart {
 
 	static {
 		try {
-			HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+			// HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+			File file = new File("C:\\Outils\\jdk1.8.0_101\\jre\\lib\\security\\cacerts");
+			KeyStore certTrustStore = SecurityUtils.getJavaKeyStore();
+			InputStream keyStoreStream = new FileInputStream(file);
+			SecurityUtils.loadKeyStore(certTrustStore, keyStoreStream, "changeit");
+
+			HTTP_TRANSPORT = (new NetHttpTransport.Builder()).trustCertificates(certTrustStore).build();
 			DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
 		} catch (Throwable t) {
 			t.printStackTrace();
